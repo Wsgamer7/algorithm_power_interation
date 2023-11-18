@@ -1,33 +1,36 @@
 import numpy as np
 
 
-# return(特征值, 特征向量) of 绝对值最大的特征值
-def get_max_lambda(mat, delta=1e-10, max_iter=1000):
-    iters_count = 1
-    N = np.shape(mat)[0]
-    u = np.ones(shape=(N))  # init u=v0
-    m_old = 1
-    delta_now = 1
+def get_lambda1(matrix, delta=1e-10, max_iter=1000):
+    matrix_rows = np.shape(matrix)[0]
+    normalized_vec = np.ones(shape=(matrix_rows))  # 初始向量v0
+    max_vec_old = 1
 
-    while iters_count <= max_iter and delta_now > delta:
-        v = np.matmul(mat, u)
-        m = np.max(v)  # m=hat_lambda1， 特征值预测值
-        u = v / m  # u=hat_x1，特征向量预测值
-        delta_now = abs(m - m_old)
-        print("第{0}次迭代, lambda1 = {1}, x1 = {2}".format(iters_count, m, u))
-        m_old = m
-        iters_count += 1
+    for i in range(1, max_iter + 1):
+        vec = np.matmul(matrix, normalized_vec)
+        max_vec = np.max(vec)
+        normalized_vec = vec / max_vec
+        delta_now = abs(max_vec - max_vec_old)
+        if delta_now < delta:
+            print("success in the {0}th iter".format(i))
+            print("lamda1:{0}, x1:{1}".format(max_vec, normalized_vec))
+            return (max_vec, normalized_vec)
+        print("the {0}th iter, lamda1:{1}, x1:{2}".format(i, max_vec, normalized_vec))
+        max_vec_old = max_vec
+    return (False, False)
 
-    if iters_count > max_iter and delta_now > delta:
-        print("迭代次数达到最大值，迭代结束")
-    else:
-        print(
-            "成功：第{iters_count}次迭代 , lambda1 = {m}".format(
-                iters_count=iters_count - 1, m=m
-            )
-        )
+
+def get_ture_lambda1(matrix, delta=1e-10, max_iter=1000):
+    lambda1, x1 = get_lambda1(matrix, delta, max_iter)
+    if lambda1 == False and x1 == False:
+        print("可能 lambda1 = - lambda2, 继续迭代")
+        lambda1_square, x1 = get_lambda1(np.matmul(matrix, matrix), delta, max_iter)
+        if lambda1_square:
+            lambda1 = np.sqrt(lambda1_square)
+    return lambda1, x1
 
 
 A = np.array([[1, 2], [0, 2]])
 B = np.array([[-2, 1, 3], [0, 1, 3], [0, 0, 3]])
-get_max_lambda(B, max_iter=1000)
+C = np.array([[-2, 0, 0], [0, 2, 0], [0, 0, -2]])
+print(get_lambda1(C))
