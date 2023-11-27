@@ -30,7 +30,29 @@ def get_ture_lambda1(matrix, delta=1e-10, max_iter=1000):
     return lambda1, x1
 
 
-A = np.array([[1, 2], [0, 2]])
-B = np.array([[-2, 1, 3], [0, 1, 3], [0, 0, 3]])
-C = np.array([[-2, 0, 0], [0, 2, 0], [0, 0, -2]])
-print(get_lambda1(C))
+# 算所有特征值和特征向量
+def get_all_lambda(matrix, delta=1e-10, max_iter=1000):
+    lambda_x_lst = []
+    for i in range(np.shape(matrix)[0]):
+        lambda1, x1 = get_ture_lambda1(matrix, delta, max_iter)
+        lambda_x_lst.append((lambda1, x1))
+        normalized_x1 = x1 / np.linalg.norm(x1)
+        matrix = matrix - lambda1 * np.outer(normalized_x1, normalized_x1)
+    print("=======================")
+    print("特征值，  特征向量")
+    for lam, x1 in lambda_x_lst:
+        print(
+            "{0:.5f}, {1}".format(
+                lam,
+                x1,
+            )
+        )
+    return lambda_x_lst
+
+
+# 用法：改A，点运行， A需要是对称阵
+A = np.array([[1, 0, 0], [0, 20, 0], [0, 0, -20]], dtype=np.double)
+get_all_lambda(A, delta=1e-15)
+# A1 = np.array([[-4.0, -10.0, -10.0], [-10.0, -2.0, -10.0], [-10.0, -10.0, 0.0]])
+# lambda1_A1 = get_ture_lambda1(A1)
+# true_lambda1_A1 = np.linalg.eigvals(A1)
